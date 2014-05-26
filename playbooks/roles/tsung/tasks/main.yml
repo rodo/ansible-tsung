@@ -1,0 +1,44 @@
+---
+#
+# Tsung Configuration
+#
+#
+#
+# Tasks for role tsung
+#
+# Overview:
+#
+#
+# Dependencies:
+#
+#
+# Example play:
+#
+#
+- name: create a user tsung
+  user: name={{tsung_role_name}} generate_ssh_key=yes ssh_key_bits=2048
+
+- name: install system packages for tsung compilation
+  apt: pkg={{ item }} state=present
+  with_items: tsung_debian_pkgs
+
+- name: clone the github repository
+  git: >
+    repo=https://github.com/processone/tsung.git dest={{tsung_dest_dir}} version={{tsung_version}}
+
+- name: configure
+  shell:
+    ./configure
+    chdir={{tsung_dest_dir}}
+    creates={{tsung_dest_dir}}/config.status
+
+- name: make
+  shell:
+    /usr/bin/make
+    chdir={{tsung_dest_dir}}
+    creates={{tsung_dest_dir}}/ebin/tsung.app
+
+- name: make install
+  shell:
+    /usr/bin/make install
+    chdir={{tsung_dest_dir}}

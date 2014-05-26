@@ -1,0 +1,41 @@
+---
+#
+# Tsung Configuration
+#
+# github:     https://github.com/rodo/ansible-tsung
+#
+##
+# Defaults for role tsung
+#
+
+# unix user that will run tsung
+#
+tsung_role_name: tsung
+
+#
+# directory where source will be build
+#
+tsung_dest_dir: /usr/local/src/tsung
+#
+# Version
+#
+tsung_version: v1.5.1
+
+
+#
+# OS packages
+#
+
+tsung_debian_pkgs:
+  - git
+  - autoconf
+  - automake
+  - make
+  - erlang-base
+  - erlang-crypto
+  - erlang-eunit
+  - erlang-inets
+  - erlang-snmp
+  - erlang-ssl
+  - erlang-xmerl
+  - erlang-dev

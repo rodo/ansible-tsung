@@ -1,0 +1,10 @@
+---
+# Creates a new ansible role
+# Usage:
+#   ansible-playbook -c local --limit "localhost," ./tsung.yml -i "localhost,"
+#
+- hosts: localhost
+  sudo: True
+  gather_facts: False
+  roles:
+    - tsung
