@@ -6,25 +6,18 @@ Ansible playbooks for Tsung deployment
 Using
 =====
 
-1. launch your instances
+1. launch your instances on EC2 or OpenStack
 
-2. tag one of them controller **tsung_role=controller**
+2. tag one of them as controller with **tsung_role=controller**
 
-3. build the list of instances
+3. configure you cluster is as simple as run :
 
-$ ec2tool.py playbooks/roles/tsung_scenario/templates
+`$ ec2tool.py`
 
-
-`$ cd `
-
-Create a ssl key
+4. create the ssh key
 
 `$ ssh-keygen -t dsa -f playbooks/roles/tsung/templates/id_dsa
 
+5. run ansible to set up teh whole cluster
 
-AWS EC2
-=======
-
-Using this playbook on EC2
-
-$ ansible-playbook -i "ec2-54-85-183-208.compute-1.amazonaws.com," -u ubuntu playbooks/tsung.yml
+6. ssh to the **controller** and enjoy
