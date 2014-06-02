@@ -12,7 +12,7 @@ Using
 
 3. configure you cluster is as simple as run :
 
-`$ ec2tool.py`
+`$ python ec2tool.py REGION`
 
 4. create the ssh key
 
