@@ -12,11 +12,34 @@
 # Dependencies:
 #
 #
-# Example play:
-#
 #
 - name: create a user tsung
-  user: name={{tsung_role_name}} generate_ssh_key=yes ssh_key_bits=2048
+  user: name={{tsung_role_name}}
+
+- name: ssh config dir
+  file: path=/home/{{tsung_role_name}}/.ssh mode=700 owner={{tsung_role_name}} group={{tsung_role_name}} state=directory
+
+- name: ssh keys
+  template: 
+    src=./roles/tsung/templates/id_dsa 
+    dest=/home/{{tsung_role_name}}/.ssh/id_dsa 
+    owner=tsung 
+    group=tsung 
+    mode=0600
+
+- name: authorized_keys
+  template: 
+    src=./roles/tsung/templates/id_dsa.pub 
+    dest=/home/{{tsung_role_name}}/.ssh/authorized_keys 
+    owner=tsung 
+    group=tsung 
+    mode=0600
+
+- name: foobar
+  template: src=./roles/tsung/templates/foobar dest=/home/{{tsung_role_name}}/foobar owner=tsung group=tsung mode=0600
+
+- name: ssh config
+  template: src=./roles/tsung/templates/config dest=/home/{{tsung_role_name}}/.ssh/config owner=tsung group=tsung mode=0600
 
 - name: install system packages for tsung compilation
   apt: pkg={{ item }} state=present

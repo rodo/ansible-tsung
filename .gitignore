@@ -1,3 +1,5 @@
 *~
 venv/
 *.ini
+playbooks/roles/tsung/templates/id_dsa
+playbooks/roles/tsung/templates/id_dsa.pub
