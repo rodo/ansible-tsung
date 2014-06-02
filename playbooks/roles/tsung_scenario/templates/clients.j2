@@ -1,5 +1,6 @@
 <!-- Client side setup -->
 <clients>
   {% for node in injectors %}
-  <client host="{{node.private_dns_name}}" />{% endfor %}
+  <client host="{{node.private_short_name}}" />
+  {% endfor %}
 </clients>

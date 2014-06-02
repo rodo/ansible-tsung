@@ -21,3 +21,8 @@ Using
 5. run ansible to set up teh whole cluster
 
 6. ssh to the **controller** and enjoy
+
+Dependencies
+============
+
+Python libraries listed in `requirements.txt`

@@ -9,8 +9,8 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
 # controller
-{{controller.private_ip_address}} {{controller.private_dns_name}}
+{{controller.private_ip_address}} {{controller.private_dns_name}} {{controller.private_short_name}}
 
 # injectors
-{% for node in injectors %}{{node.private_ip_address}} {{node.private_dns_name}}
+{% for node in injectors %}{{node.private_ip_address}} {{node.private_dns_name}} {{node.private_short_name}}
 {% endfor %}
