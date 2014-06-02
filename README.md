@@ -16,9 +16,9 @@ Using
 
 4. create the ssh key
 
-`$ ssh-keygen -t dsa -f playbooks/roles/tsung/templates/id_dsa
+`$ ssh-keygen -t dsa -f playbooks/roles/tsung/templates/id_dsa`
 
-5. run ansible to set up teh whole cluster
+5. run ansible to set up the whole cluster
 
 6. ssh to the **controller** and enjoy
 
