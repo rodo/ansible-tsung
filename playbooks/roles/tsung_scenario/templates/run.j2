@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd"
+[
+<!ENTITY clients SYSTEM "clients.xml">
+<!ENTITY options SYSTEM "options.xml">
+]
+>
+<!--
+
+-->
+<tsung loglevel="info" version="1.0">
+
+  &clients;
+
+  <!-- Server side setup -->
+  <servers>
+    <server host="localhost" port="80" type="tcp"/>
+  </servers>
+
+  <load>
+    <arrivalphase phase="1" duration="20" unit="second">
+      <users interarrival="1" unit="second" maxnumber="1"></users>
+    </arrivalphase>
+  </load>
+  
+  &options;
+
+ <sessions>
+
+   <session name='foobar' weight='10'  type='ts_http'>
+     <request subst="true">
+       <http url="/index.html" method="GET" version="1.1"/>
+     </request>
+
+   </session>
+
+ </sessions>
+</tsung>

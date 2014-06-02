@@ -1,0 +1,5 @@
+  <options>
+    <option type="ts_http" name="user_agent">
+      <user_agent probability="100">tsung 1.5.0</user_agent>
+    </option>
+  </options>

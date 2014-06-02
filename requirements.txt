@@ -1,0 +1,11 @@
+Jinja2==2.7.2
+MarkupSafe==0.23
+PyYAML==3.11
+ansible==1.6.2
+argparse==1.2.1
+boto==2.28.0
+distribute==0.6.24
+ecdsa==0.11
+paramiko==1.14.0
+pycrypto==2.6.1
+wsgiref==0.1.2

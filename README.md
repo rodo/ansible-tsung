@@ -6,11 +6,20 @@ Ansible playbooks for Tsung deployment
 Using
 =====
 
-`$ cd playbooks/`
+1. launch your instances
+
+2. tag one of them controller **tsung_role=controller**
+
+3. build the list of instances
+
+$ ec2tool.py playbooks/roles/tsung_scenario/templates
+
+
+`$ cd `
 
 Create a ssl key
 
-`$ ssh-keygen -t dsa -f roles/tsung/templates/id_dsa
+`$ ssh-keygen -t dsa -f playbooks/roles/tsung/templates/id_dsa
 
 
 AWS EC2

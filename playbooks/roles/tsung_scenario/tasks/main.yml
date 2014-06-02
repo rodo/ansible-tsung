@@ -1,0 +1,30 @@
+---
+#
+# Tsung scenario
+#
+#
+#
+
+- name: clients.xml
+  template: 
+    src=./roles/tsung_scenario/templates/clients.j2
+    dest=/home/{{tsung_role_name}}/clients.xml    
+    owner=tsung 
+    group=tsung 
+    mode=0644
+
+- name: options.xml
+  template: 
+    src=./roles/tsung_scenario/templates/options.xml
+    dest=/home/{{tsung_role_name}}/options.xml    
+    owner=tsung 
+    group=tsung 
+    mode=0644
+
+- name: run.xml
+  template: 
+    src=./roles/tsung_scenario/templates/run.j2
+    dest=/home/{{tsung_role_name}}/run.xml    
+    owner=tsung 
+    group=tsung 
+    mode=0644

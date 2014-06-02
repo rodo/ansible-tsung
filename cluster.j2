@@ -1,0 +1,6 @@
+[controller]
+{{controller.dns_name}}
+
+[injectors]
+{% for node in injectors %}{{node.dns_name}}
+{% endfor %}

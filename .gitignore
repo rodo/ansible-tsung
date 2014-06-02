@@ -1,5 +1,9 @@
 *~
+playbooks/roles/tsung/vars/nodes.yml
+id_dsa
+id_dsa.pub
+id_rsa
+id_rsa.pub
+cluster.ini
+clients.xml
 venv/
-*.ini
-playbooks/roles/tsung/templates/id_dsa
-playbooks/roles/tsung/templates/id_dsa.pub
