@@ -1,0 +1,18 @@
+---
+#
+#
+#
+
+- name: install system packages for yaws compilation
+  apt: pkg={{ item }} state=present
+  with_items: yaws_debian_pkgs
+
+- name: localhost.conf
+  template: 
+    src=./roles/yaws/templates/localhost.conf
+    dest=/etc/yaws/conf.avail/localhost.conf
+    owner=root
+    group=yaws
+    mode=0640
+
+- service: name=yaws state=restarted

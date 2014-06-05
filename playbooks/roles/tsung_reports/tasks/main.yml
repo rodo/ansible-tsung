@@ -1,0 +1,27 @@
+---
+#
+# Tsung Configuration
+#
+#
+#
+# Tasks for role tsung
+#
+# Overview:
+#
+#
+# Dependencies:
+#
+#
+#
+
+- name: install system packages
+  apt: pkg={{ item }} state=present
+  with_items: tsung_reports_debian_pkgs
+
+- name: logs dir
+  file: 
+    path=/home/{{tsung_role_name}}/logs
+    mode=0755 
+    owner={{tsung_role_name}} 
+    group={{tsung_role_name}} 
+    state=directory

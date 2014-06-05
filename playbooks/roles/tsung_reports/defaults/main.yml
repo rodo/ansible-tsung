@@ -1,0 +1,10 @@
+---
+#
+# Tsung reports Configuration
+#
+#  packages
+#
+
+tsung_reports_debian_pkgs:
+  - gnuplot
+  - libtemplate-perl

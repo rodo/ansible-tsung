@@ -22,6 +22,13 @@ Using
 
 6. ssh to the **controller** and enjoy
 
+Playbooks
+=========
+
+* munin.yml : deploy munin-node on all nodes, and munin on controller
+
+* tsung.yml : deploy tsung on all nodes
+
 Dependencies
 ============
 

@@ -1,0 +1,9 @@
+# a simple host tree
+
+# injectors
+{% for node in injectors %} 
+# {{node.private_dns_name}} 
+[{{node.private_short_name}}.injectors]
+    address {{node.private_ip_address}}
+    use_node_name yes
+{% endfor %}

@@ -19,15 +19,6 @@
     shell=/bin/bash
     comment='created by ansible playbook'
 
-- name: hosts
-  template: 
-    src=./roles/tsung/templates/hosts.j2
-    dest=/etc/hosts
-    owner=root
-    group=root
-    mode=0644
-
-
 - name: ssh config dir
   file: path=/home/{{tsung_role_name}}/.ssh mode=700 owner={{tsung_role_name}} group={{tsung_role_name}} state=directory
 
@@ -46,8 +37,6 @@
     owner=tsung 
     group=tsung 
     mode=0600
-
-
 
 - name: ssh config
   template: src=./roles/tsung/templates/config dest=/home/{{tsung_role_name}}/.ssh/config owner=tsung group=tsung mode=0600
