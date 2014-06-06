@@ -8,7 +8,7 @@ import json
 import yaml
 
 class Tsing(boto.ec2.instance.Instance):
-    
+
     def shortname(self):
         return self.private_dns_name.split('.')[0]
 
@@ -41,7 +41,7 @@ def get_instance(instance, data):
                 break
 
     return result
-                
+
 
 def get_data_region(region, data):
     """
@@ -64,7 +64,52 @@ def get_data_region(region, data):
     for reg in config['regions']:
         if reg['region'] == ec2_regions[region]:
             return reg
-        
+
+
+def write_nodes(controller, injectors, data):
+    """
+
+    controller (dict)
+    injectors (dict)
+    """
+    hosts = open("playbooks/roles/tsung/vars/nodes.yml", 'w')
+    hosts.write("---\n")
+    contr_str = "controller: { private_dns_name: '%s', private_ip_address: '%s', private_short_name: '%s' }\n\n"
+    hosts.write(contr_str % (controller.private_dns_name,
+                             controller.private_ip_address,
+                             controller.private_short_name))
+    hosts.write("injectors:\n")
+    for injec in injectors:
+        print injec.__dict__
+        specs = get_specs(injec.instance_type, region, data)
+        injector = {"private_dns_name": str(injec.private_dns_name),
+                    "private_ip_address": str(injec.private_ip_address),
+                    "private_short_name": str(injec.private_short_name),
+                    "instance_type": str(injec.instance_type),
+                    "cpu": int(specs['vCPU'])}
+
+        hosts.write(" - {}".format(yaml.dump(injector, encoding='utf-8')))
+    hosts.close()
+
+
+def instance_weights(injectors, region, data):
+
+    assw = {}
+    weights = []
+
+    for injec in injectors:
+        specs = get_specs(injec['instance_type'], region, data)
+        weights.append(float(specs['memoryGiB']))
+
+    minweight = min(weights)
+
+    for injec in injectors:
+        specs = get_specs(injec['instance_type'], region, data)
+        iid = injec['id']
+        assw[iid] = int(round(float(specs['memoryGiB']) / minweight))
+
+    return assw
+
 
 if __name__ == "__main__":
 
@@ -95,7 +140,7 @@ if __name__ == "__main__":
 
         if inst.state == 'running':
             tags = inst.tags
-        
+
             if 'tsung_role' in tags:
                 if tags['tsung_role'] == 'controller':
                     controller = inst
@@ -115,32 +160,12 @@ if __name__ == "__main__":
         print " controller : tsung@{} ".format(controller.ip_address)
         #
         #
-        with open("linux-od.json") as data_file:    
+        with open("linux-od.json") as data_file:
             data = json.load(data_file)
 
         #
         #
-        hosts = open("playbooks/roles/tsung/vars/nodes.yml", 'w')
-        hosts.write("---\n")
-        contr_str = "controller: { private_dns_name: '%s', private_ip_address: '%s', private_short_name: '%s' }\n\n"
-        hosts.write(contr_str % (controller.private_dns_name,
-                                 controller.private_ip_address,
-                                 controller.private_short_name))
-        hosts.write("injectors:\n")
-        for injec in injectors:
-            specs = get_specs(injec.instance_type, region, data)
-            injector = {"private_dns_name": str(injec.private_dns_name), 
-                        "private_ip_address": str(injec.private_ip_address),
-                        "private_short_name": str(injec.private_short_name),
-                        "instance_type": str(injec.instance_type),
-                        "cpu": int(specs['vCPU'])}
-
-            hosts.write(" - {}".format(yaml.dump(injector, encoding='utf-8')))
-
-                                   
-                                   
-        hosts.close()
-        #
+        write_nodes(controller, injectors, data)
         #
         #
         templateLoader = jinja2.FileSystemLoader( searchpath="." )
@@ -148,16 +173,13 @@ if __name__ == "__main__":
 
         templateVars = {"injectors": injectors,
                         "controller": controller}
-
         #
         # Configure the cluster
         #
         template = templateEnv.get_template( "cluster.j2" )
-
         clients = open("cluster.ini", 'w')
         clients.write(template.render(templateVars))
         clients.close()
-
         #
         #
         print 'ansible-playbook -i cluster.ini -u ubuntu playbooks/tsung.yml'
