@@ -1,0 +1,34 @@
+---
+#
+#
+#
+- name: install munin-node package
+  apt: pkg={{ item }} state=present
+  with_items: muninnode_debian_pkgs
+
+- name: munin-node.conf
+  template: 
+    src=./roles/munin-node/templates/munin-node.j2
+    dest=/etc/munin/munin-node.conf
+    owner=root
+    group=root
+    mode=0640
+
+- name: add plugin tcp
+  file:
+    src=/usr/share/munin/plugins/tcp 
+    dest=/etc/munin/plugins/tcp 
+    state=link
+
+- name: remove plugin logged users
+  file:
+    path=/etc/munin/plugins/users
+    state=absent
+
+- name: remove plugin uptime
+  file:
+    path=/etc/munin/plugins/uptime
+    state=absent
+
+- service: name=munin-node state=restarted
+

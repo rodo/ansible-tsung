@@ -1,0 +1,8 @@
+---
+#
+#
+# OS packages
+#
+
+muninnode_debian_pkgs:
+  - munin-node

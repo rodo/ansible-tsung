@@ -1,0 +1,18 @@
+---
+#
+#
+#
+
+- name: install munin packages
+  apt: pkg={{ item }} state=present
+  with_items: munin_debian_pkgs
+
+- name: hosts
+  template: 
+    src=./roles/munin/templates/injectors.j2
+    dest=/etc/munin/munin-conf.d/injectors.conf
+    owner=root
+    group=root
+    mode=0644
+
+- service: name=cron state=restarted

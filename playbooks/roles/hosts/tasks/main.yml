@@ -1,0 +1,12 @@
+---
+#
+#
+#
+#
+- name: hosts
+  template: 
+    src=./roles/hosts/templates/hosts.j2
+    dest=/etc/hosts
+    owner=root
+    group=root
+    mode=0644

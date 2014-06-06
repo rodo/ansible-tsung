@@ -1,0 +1,8 @@
+---
+#
+#
+# OS packages
+#
+
+munin_debian_pkgs:
+  - munin

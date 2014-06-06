@@ -1,0 +1,8 @@
+---
+#
+#
+# OS packages
+#
+
+yaws_debian_pkgs:
+  - yaws
