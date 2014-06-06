@@ -22,9 +22,11 @@ if __name__ == "__main__":
         print "usage : ec2tool.py REGI0N"
         sys.exit(1)
 
+    print "connect on {}...".format(region)
+
     conn = boto.ec2.connect_to_region(region)
 
-    print "connect on {}".format(region)
+    print "connected"
 
     instances = conn.get_all_instances()
 
@@ -38,6 +40,13 @@ if __name__ == "__main__":
     for instance in instances:
         inst = instance.instances[0]
         inst.__class__ = Tsing
+
+
+        print """[{}]
+  address {}
+  use_nodename yes
+""".format(inst.private_short_name, inst.private_ip_address)
+
         if inst.state == 'running':
             tags = inst.tags
         
@@ -51,8 +60,8 @@ if __name__ == "__main__":
     #
     #
     #
-    print "found {} injectors".format(len(injectors))
-    print "controller tsung@{} ".format(controller.ip_address)
+    print "found\n {} injectors".format(len(injectors))
+    print " controller : tsung@{} ".format(controller.ip_address)
     #
     #
     #
