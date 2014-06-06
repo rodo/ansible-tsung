@@ -1,7 +1,14 @@
 ansible-tsung
 =============
 
-Ansible playbooks for Tsung deployment
+Ansible playbooks for Tsung deployment, install tsung from git
+official repo, compile on each host. Configure a sample scenarion with
+client cpu autoconfigure from instance type.  Works on EC2 with Ubuntu
+image actually.
+
+Create a user named **tsung** with a log directory ~/tsung/logs/
+served on http by Yaws on port 8080 on controller.
+
 
 Using
 =====
@@ -33,3 +40,8 @@ Dependencies
 ============
 
 Python libraries listed in `requirements.txt`
+
+Datas
+=====
+
+* http://aws.amazon.com/ec2/pricing/json/linux-od.json

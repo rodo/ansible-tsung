@@ -4,6 +4,8 @@ import os
 import jinja2
 import copy
 import sys
+import json
+import yaml
 
 class Tsing(boto.ec2.instance.Instance):
     
@@ -13,6 +15,56 @@ class Tsing(boto.ec2.instance.Instance):
     @property
     def private_short_name(self):
         return self.private_dns_name.split('.')[0]
+
+
+def get_specs(instance, region, data):
+    """
+
+    region (string) : the region name
+    data (dict)
+    """
+    datas = get_data_region(region, data)
+    instance_spec = get_instance(instance, datas)
+
+    return instance_spec
+
+def get_instance(instance, data):
+    """
+    instance (string)
+    data (dict)
+    """
+    result = None
+    for inst in data['instanceTypes']:
+        for size in inst['sizes']:
+            if instance == size['size']:
+                result = size
+                break
+
+    return result
+                
+
+def get_data_region(region, data):
+    """
+
+    region (string) : the region name
+    data (dict)
+    """
+    config = data['config']
+
+    ec2_regions = {"us-east-1" : "us-east",
+                   "us-west-1" : "us-west",
+                   "us-west-2" : "us-west-2",
+                   "eu-west-1" : "eu-ireland",
+                   "ap-southeast-1" : "apac-sin",
+                   "ap-southeast-2" : "apac-syd",
+                   "ap-northeast-1" : "apac-tokyo",
+                   "sa-east-1" : "sa-east-1"
+                   }
+
+    for reg in config['regions']:
+        if reg['region'] == ec2_regions[region]:
+            return reg
+        
 
 if __name__ == "__main__":
 
@@ -41,12 +93,6 @@ if __name__ == "__main__":
         inst = instance.instances[0]
         inst.__class__ = Tsing
 
-
-        print """[{}]
-  address {}
-  use_nodename yes
-""".format(inst.private_short_name, inst.private_ip_address)
-
         if inst.state == 'running':
             tags = inst.tags
         
@@ -61,39 +107,57 @@ if __name__ == "__main__":
     #
     #
     print "found\n {} injectors".format(len(injectors))
-    print " controller : tsung@{} ".format(controller.ip_address)
-    #
-    #
-    #
-    hosts = open("playbooks/roles/tsung/vars/nodes.yml", 'w')
-    hosts.write("---\n")
-    hosts.write("controller: { private_dns_name: '%s', private_ip_address: '%s', private_short_name: '%s' }\n\n" % (controller.private_dns_name,
-                                                                                                                controller.private_ip_address,
-                                                                                                                controller.private_short_name))
-    hosts.write("injectors:\n")
-    for injec in injectors:
-        hosts.write("  - { private_dns_name: '%s', private_ip_address: '%s', private_short_name: '%s' }\n" % (injec.private_dns_name, 
-                                                                                                          injec.private_ip_address,
-                                                                                                          injec.private_short_name))
-    hosts.close()
-    #
-    #
-    #
-    templateLoader = jinja2.FileSystemLoader( searchpath="." )
-    templateEnv = jinja2.Environment( loader=templateLoader )
 
-    templateVars = {"injectors": injectors,
-                    "controller": controller}
+    if controller is None:
+        print "ERROR didn't found any controller"
+        sys.exit(1)
+    else:
+        print " controller : tsung@{} ".format(controller.ip_address)
+        #
+        #
+        with open("linux-od.json") as data_file:    
+            data = json.load(data_file)
 
-    #
-    # Configure the cluster
-    #
-    template = templateEnv.get_template( "cluster.j2" )
+        #
+        #
+        hosts = open("playbooks/roles/tsung/vars/nodes.yml", 'w')
+        hosts.write("---\n")
+        contr_str = "controller: { private_dns_name: '%s', private_ip_address: '%s', private_short_name: '%s' }\n\n"
+        hosts.write(contr_str % (controller.private_dns_name,
+                                 controller.private_ip_address,
+                                 controller.private_short_name))
+        hosts.write("injectors:\n")
+        for injec in injectors:
+            specs = get_specs(injec.instance_type, region, data)
+            injector = {"private_dns_name": str(injec.private_dns_name), 
+                        "private_ip_address": str(injec.private_ip_address),
+                        "private_short_name": str(injec.private_short_name),
+                        "instance_type": str(injec.instance_type),
+                        "cpu": int(specs['vCPU'])}
 
-    clients = open("cluster.ini", 'w')
-    clients.write(template.render(templateVars))
-    clients.close()
+            hosts.write(" - {}".format(yaml.dump(injector, encoding='utf-8')))
 
-    #
-    #
-    print 'ansible-playbook -i cluster.ini -u ubuntu playbooks/tsung.yml'
+                                   
+                                   
+        hosts.close()
+        #
+        #
+        #
+        templateLoader = jinja2.FileSystemLoader( searchpath="." )
+        templateEnv = jinja2.Environment( loader=templateLoader )
+
+        templateVars = {"injectors": injectors,
+                        "controller": controller}
+
+        #
+        # Configure the cluster
+        #
+        template = templateEnv.get_template( "cluster.j2" )
+
+        clients = open("cluster.ini", 'w')
+        clients.write(template.render(templateVars))
+        clients.close()
+
+        #
+        #
+        print 'ansible-playbook -i cluster.ini -u ubuntu playbooks/tsung.yml'
