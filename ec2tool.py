@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import boto.ec2
-import os
 import jinja2
-import copy
 import sys
 import json
 import yaml
+
 
 class Tsing(boto.ec2.instance.Instance):
 
@@ -27,6 +26,7 @@ def get_specs(instance, region, data):
     instance_spec = get_instance(instance, datas)
 
     return instance_spec
+
 
 def get_instance(instance, data):
     """
@@ -51,14 +51,14 @@ def get_data_region(region, data):
     """
     config = data['config']
 
-    ec2_regions = {"us-east-1" : "us-east",
-                   "us-west-1" : "us-west",
-                   "us-west-2" : "us-west-2",
-                   "eu-west-1" : "eu-ireland",
-                   "ap-southeast-1" : "apac-sin",
-                   "ap-southeast-2" : "apac-syd",
-                   "ap-northeast-1" : "apac-tokyo",
-                   "sa-east-1" : "sa-east-1"
+    ec2_regions = {"us-east-1": "us-east",
+                   "us-west-1": "us-west",
+                   "us-west-2": "us-west-2",
+                   "eu-west-1": "eu-ireland",
+                   "ap-southeast-1": "apac-sin",
+                   "ap-southeast-2": "apac-syd",
+                   "ap-northeast-1": "apac-tokyo",
+                   "sa-east-1": "sa-east-1"
                    }
 
     for reg in config['regions']:
@@ -68,7 +68,6 @@ def get_data_region(region, data):
 
 def write_nodes(controller, injectors, data):
     """
-
     controller (dict)
     injectors (dict)
     """
@@ -93,7 +92,9 @@ def write_nodes(controller, injectors, data):
 
 
 def instance_weights(injectors, region, data):
-
+    """
+    Define instances weights
+    """
     assw = {}
     weights = []
 
@@ -111,29 +112,12 @@ def instance_weights(injectors, region, data):
     return assw
 
 
-if __name__ == "__main__":
-
-    try:
-        region = sys.argv[1]
-    except:
-        print "usage : ec2tool.py REGI0N"
-        sys.exit(1)
-
-    print "connect on {}...".format(region)
-
-    conn = boto.ec2.connect_to_region(region)
-
-    print "connected"
-
-    instances = conn.get_all_instances()
-
+def parse_instances(instances):
     """
-['__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_in_monitoring_element', '_placement', '_previous_state', '_state', '_update', 'add_tag', 'ami_launch_index', 'architecture', 'block_device_mapping', 'client_token', 'confirm_product', 'connection', 'create_image', 'dns_name', 'ebs_optimized', 'endElement', 'eventsSet', 'get_attribute', 'get_console_output', 'group_name', 'groups', 'hypervisor', 'id', 'image_id', 'instance_profile', 'instance_type', 'interfaces', 'ip_address', 'item', 'kernel', 'key_name', 'launch_time', 'modify_attribute', 'monitor', 'monitored', 'monitoring', 'monitoring_state', 'persistent', 'placement', 'placement_group', 'placement_tenancy', 'platform', 'previous_state', 'previous_state_code', 'private_dns_name', 'private_ip_address', 'product_codes', 'public_dns_name', 'ramdisk', 'reason', 'reboot', 'region', 'remove_tag', 'requester_id', 'reset_attribute', 'root_device_name', 'root_device_type', 'spot_instance_request_id', 'start', 'startElement', 'state', 'state_code', 'state_reason', 'stop', 'subnet_id', 'tags', 'terminate', 'unmonitor', 'update', 'use_ip', 'virtualization_type', 'vpc_id']
-"""
-    nodes = []
-    injectors = []
+    Wait for instance in running state
+    """
     controller = None
-
+    injectors = []
     for instance in instances:
         inst = instance.instances[0]
         inst.__class__ = Tsing
@@ -148,9 +132,54 @@ if __name__ == "__main__":
                     injectors.append(inst)
             else:
                 injectors.append(inst)
+
+    return controller, injectors
+
+
+def cloud_connect(region):
+    """
+    Connect on cloud
+    """
+    print "connect on {}...".format(region)
+
+    conn = boto.ec2.connect_to_region(region)
+    return conn
+
+
+def write_ini(injectors, controller):
+    """
+    Write ansible .ini file
+    """
+    templateLoader = jinja2.FileSystemLoader(searchpath=".")
+    templateEnv = jinja2.Environment(loader=templateLoader)
+
+    templateVars = {"injectors": injectors,
+                    "controller": controller}
     #
+    # Configure the cluster
     #
-    #
+    template = templateEnv.get_template("cluster.j2")
+    clients = open("cluster.ini", 'w')
+    clients.write(template.render(templateVars))
+    clients.close()
+
+
+
+if __name__ == "__main__":
+
+    try:
+        region = sys.argv[1]
+    except:
+        print "usage : ec2tool.py REGI0N"
+        sys.exit(1)
+
+    conn = cloud_connect(region)
+    print "connected"
+
+    instances = conn.get_all_instances()
+
+    controller, injectors = parse_instances()
+
     print "found\n {} injectors".format(len(injectors))
 
     if controller is None:
@@ -162,24 +191,9 @@ if __name__ == "__main__":
         #
         with open("linux-od.json") as data_file:
             data = json.load(data_file)
-
         #
         #
         write_nodes(controller, injectors, data)
-        #
-        #
-        templateLoader = jinja2.FileSystemLoader( searchpath="." )
-        templateEnv = jinja2.Environment( loader=templateLoader )
-
-        templateVars = {"injectors": injectors,
-                        "controller": controller}
-        #
-        # Configure the cluster
-        #
-        template = templateEnv.get_template( "cluster.j2" )
-        clients = open("cluster.ini", 'w')
-        clients.write(template.render(templateVars))
-        clients.close()
-        #
+        write_ini(injectors, controller)
         #
         print 'ansible-playbook -i cluster.ini -u ubuntu playbooks/tsung.yml'

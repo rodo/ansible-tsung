@@ -88,14 +88,12 @@ class Tests(unittest.TestCase):
         self.assertEqual("2", inst['vCPU'])
 
     def test_instance_weights(self):
-        """Configuration file"""
+        """
+        Compute instance weights
+        """
         region = get_data_region("us-east-1", datas)
-
         result = instance_weights(self.injectors, "us-east-1", datas)
         self.assertEqual({u'i-e78942b5': 12, u'i-7277bf20': 1}, result)
-
-
-
 
 if __name__ == '__main__':
     unittest.main()
