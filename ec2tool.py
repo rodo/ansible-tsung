@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     instances = conn.get_all_instances()
 
-    controller, injectors = parse_instances()
+    controller, injectors = parse_instances(instances)
 
     print "found\n {} injectors".format(len(injectors))
 
